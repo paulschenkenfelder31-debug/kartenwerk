@@ -6,12 +6,10 @@ Kartenwerk ist ein lokales Aufgabenbrett. Website, Konten, Passworthashes, Sitzu
 
 Voraussetzung: Node.js 20 oder neuer.
 
-1. Entpacke `kartenwerk-lokal.zip` in einen eigenen Ordner.
-2. Windows: Doppelklick auf `start-windows.bat`. Auf macOS/Linux: Terminal im Ordner öffnen und `npm start` ausführen.
-3. Öffne `http://127.0.0.1:4173` im Browser.
-4. Wähle **Konto erstellen**. Das Konto gilt nur auf diesem Rechner.
-
-Node.js 20 oder neuer muss installiert sein. Das Projektpaket enthält die MCP-Laufzeitbibliotheken bereits. Für eine normale Entwicklerinstallation ohne mitgelieferte `node_modules` zuerst `npm install` ausführen.
+1. Lade dieses Repository von GitHub herunter oder klone es mit `git clone https://github.com/paulschenkenfelder31-debug/kartenwerk.git`.
+2. Öffne ein Terminal im Projektordner und installiere die Abhängigkeiten einmal mit `npm install`.
+3. Windows: Doppelklick auf `start-windows.bat`. Auf macOS/Linux: `npm start` ausführen.
+4. Öffne `http://127.0.0.1:4173` im Browser und wähle **Konto erstellen**. Das Konto gilt nur auf diesem Rechner.
 
 Beim ersten Start erzeugt die App `data/local.json`. Sie enthält deine lokalen Konten, gehashte Passwörter, Sitzungen und Karten. Beende `npm start`, um den lokalen Server zu stoppen. Sichere oder kopiere `data/local.json`, wenn du deine Karten sichern möchtest.
 
@@ -55,6 +53,8 @@ Beispiel für die Konfiguration eines lokalen MCP-Clients:
 Die E-Mail in `KARTENWERK_USER_EMAIL` muss zu einem vorher in der Website angelegten Konto passen. Installiere die Abhängigkeiten einmal mit `npm install`, bevor du den MCP-Server verbindest.
 
 Eine kopierbare Vorlage liegt in [`mcp-config.example.json`](mcp-config.example.json). Ersetze darin den Beispielpfad durch den vollständigen Pfad zu diesem Ordner und trage dieselbe E-Mail-Adresse wie beim lokalen Kartenwerk-Konto ein. Die MCP-Konfiguration enthält keine Passwörter.
+
+Für die Verbindung mit ChatGPT im Browser gibt es eine Schritt-für-Schritt-Anleitung unter [`mcp/CHATGPT-TUNNEL.md`](mcp/CHATGPT-TUNNEL.md).
 
 ## GitHub und lokale Daten
 
