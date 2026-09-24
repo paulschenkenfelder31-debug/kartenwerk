@@ -1,8 +1,26 @@
-# Kartenwerk (lokal)
+# Kartenwerk – Aufgabenbrett für Handy und Rechner
 
-Kartenwerk ist ein lokales Aufgabenbrett. Website, Konten, Passworthashes, Sitzungen, Bilder und Karten werden auf dem Rechner gespeichert. Die App lädt keine externen Schriftarten, Skripte oder Bilder.
+Kartenwerk hat zwei getrennte Betriebsarten: eine dauerhaft erreichbare Handy-Version auf Cloudflare und die ursprüngliche lokale Node-Version. Beide verwenden dieselbe Oberfläche, aber **verschiedene Datenbanken und Konten**. Die Schriftarten, Piktogramme und Skripte liegen im Repository.
 
-## Starten
+## Auf dem Handy veröffentlichen
+
+Du brauchst ein kostenloses Cloudflare-Konto und dein GitHub-Konto. Ein Computer, ein Terminal und ein laufender Codespace sind dafür nicht nötig.
+
+1. Öffne auf deinem Handy [**Kartenwerk bei Cloudflare bereitstellen**](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fpaulschenkenfelder31-debug%2Fkartenwerk).
+2. Melde dich bei Cloudflare an und verbinde dein GitHub-Konto. Cloudflare erstellt eine **neue Kopie** des öffentlichen Repositorys in deinem GitHub-Konto. Weil `kartenwerk` bei dir schon existiert, nenne die neue Kopie zum Beispiel **kartenwerk-cloudflare**. Belasse den Worker-Namen bei `kartenwerk` und bestätige die Bereitstellung. Akzeptiere als Deploy-Befehl `npm run deploy`: Er führt zuerst die D1-Migration aus und veröffentlicht danach den Worker.
+3. Warte, bis Datenbank und Deployment fertig sind. Öffne die angezeigte `*.workers.dev`-Adresse im Handy-Browser. Registriere dort ein neues Konto. Tippe **Foto / KI**, wähle ein Foto aus Kamera oder Galerie oder schreibe Stichworte. Prüfe den Kartenvorschlag und tippe **Karte erstellen**.
+
+Cloudflare liest die Ressourcen aus [`wrangler.jsonc`](wrangler.jsonc) und richtet D1 und Workers AI beim Deploy-Button automatisch ein. Die Datenbanktabellen entstehen durch [`migrations/0001_init.sql`](migrations/0001_init.sql). Wenn Cloudflare auf dem Handy statt `npm run deploy` nur `npx wrangler deploy` vorschlägt, ändere den **Deploy-Befehl** vor dem Bestätigen auf `npm run deploy`. Der **Build-Befehl** bleibt leer. Das ursprüngliche GitHub-Repository und die neue Kopie enthalten nur Quellcode; deine Konten und Karten liegen in *deinem Cloudflare-D1-Konto*. Fotos, die du einer Karte hinzufügst, werden dort ebenfalls gespeichert. Die KI verarbeitet den übermittelten Text und das Foto über Cloudflare Workers AI. Prüfe Vorschläge und Datumsangaben vor dem Speichern.
+
+Cloudflare bietet für Workers, D1 und Workers AI kostenlose Nutzung innerhalb der jeweils geltenden Kontingente. Bei erschöpftem KI-Kontingent kannst du Karten weiter manuell erstellen. Die E-Mail-Adresse dient nur als Anmeldename; Kartenwerk sendet keine E-Mails und hat keinen Passwort-Reset per E-Mail. Bewahre dein Passwort auf. Konten aus der alten lokalen Version werden nicht automatisch auf Cloudflare übertragen.
+
+**ChatGPT auf dem Handy:** Die direkte MCP-Aktion in ChatGPT ist dort derzeit nicht verfügbar. Die Schaltfläche **Foto / KI** nutzt deshalb Cloudflare Workers AI in Kartenwerk selbst; das ist kein Aufruf an ChatGPT. Der vorhandene lokale MCP-Server arbeitet ausschließlich mit der separaten lokalen Datenbank und kann keine Cloudflare-Karten anlegen.
+
+## Lokale Version auf einem Rechner
+
+Bei `npm start` werden Website, Konten, Passworthashes, Sitzungen, Bilder und Karten auf diesem Rechner gespeichert. Die lokale Version braucht keine Cloudflare-Verbindung; der Foto/KI-Button setzt die Cloudflare-Version voraus.
+
+## Lokal starten
 
 Voraussetzung: Node.js 20 oder neuer.
 

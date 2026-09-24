@@ -30,6 +30,29 @@ function rank(card) { return ({high:6,medium:3,low:1}[card.importance] || 3) + (
 function groupFor(card) { if (card.importance === 'high' && card.urgency === 'high') return 'urgent'; if (card.importance === 'low' && card.urgency === 'low') return 'later'; return 'next'; }
 function showToast(message) { toast.textContent = message; toast.classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('visible'), 2700); }
 
+function readDataURL(blob) {
+  return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
+}
+async function prepareImage(file) {
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Bitte wähle ein JPEG-, PNG- oder WebP-Bild.');
+  if (file.size <= 1_300_000) return readDataURL(file);
+  const url = URL.createObjectURL(file);
+  try {
+    const photo = new Image();
+    await new Promise((resolve, reject) => { photo.onload = resolve; photo.onerror = reject; photo.src = url; });
+    const scale = Math.min(1, 1400 / Math.max(photo.naturalWidth, photo.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(photo.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(photo.naturalHeight * scale));
+    canvas.getContext('2d').drawImage(photo, 0, 0, canvas.width, canvas.height);
+    for (const quality of [0.78, 0.58, 0.38]) {
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+      if (blob && blob.size <= 1_300_000) return readDataURL(blob);
+    }
+  } finally { URL.revokeObjectURL(url); }
+  throw new Error('Dieses Bild ist zu groß. Bitte wähle ein kleineres Foto.');
+}
+
 function showAuth(mode = 'login') {
   document.querySelector('#auth-screen').classList.remove('hidden');
   document.querySelector('#app-shell').classList.add('hidden');
@@ -38,7 +61,7 @@ function showAuth(mode = 'login') {
   document.querySelector('#register-form').classList.toggle('hidden', isLogin);
   document.querySelectorAll('[data-auth-view]').forEach((button) => button.classList.toggle('active', button.dataset.authView === mode));
   document.querySelector('#auth-title').textContent = isLogin ? 'Schön, dass du da bist.' : 'Dein Bereich beginnt hier.';
-  document.querySelector('#auth-subtitle').textContent = isLogin ? 'Melde dich bei deinem Kartenwerk an.' : 'Erstelle ein lokales Konto für deine Aufgaben.';
+  document.querySelector('#auth-subtitle').textContent = isLogin ? 'Melde dich bei deinem Kartenwerk an.' : 'Erstelle dein Konto für deine Aufgaben.';
   document.querySelector('#login-error').textContent = '';
   document.querySelector('#register-error').textContent = '';
 }
@@ -63,7 +86,7 @@ async function activateUser(user) {
 
 async function checkSession() {
   try { const { user } = await api('/api/me'); if (user) await activateUser(user); else showAuth('login'); }
-  catch { showAuth('login'); showToast('Der lokale Server ist nicht erreichbar. Bitte starte ihn erneut.'); }
+  catch { showAuth('login'); showToast('Kartenwerk ist gerade nicht erreichbar. Bitte versuche es erneut.'); }
 }
 
 async function loadCards() {
@@ -92,7 +115,7 @@ document.querySelector('#register-form').addEventListener('submit', async (event
   const submit = event.currentTarget.querySelector('[type=submit]');
   submit.disabled = true;
   if (form.get('password') !== form.get('passwordConfirm')) { document.querySelector('#register-error').textContent = 'Die Passwörter stimmen nicht überein.'; submit.disabled = false; return; }
-  try { const result = await api('/api/register', { method:'POST', body:JSON.stringify({name:form.get('name'), email:form.get('email'), password:form.get('password')}) }); event.currentTarget.reset(); await activateUser(result.user); showToast('Dein lokales Konto ist erstellt.'); }
+  try { const result = await api('/api/register', { method:'POST', body:JSON.stringify({name:form.get('name'), email:form.get('email'), password:form.get('password')}) }); event.currentTarget.reset(); await activateUser(result.user); showToast('Dein Konto ist erstellt.'); }
   catch (error) { document.querySelector('#register-error').textContent = error.message; }
   finally { submit.disabled = false; }
 });
@@ -175,14 +198,41 @@ function openCardDialog() {
 }
 
 document.querySelector('#new-card').onclick = openCardDialog;
+document.querySelector('#ai-card').onclick = () => { document.querySelector('#ai-form').reset(); document.querySelector('#ai-error').textContent = ''; document.querySelector('#ai-dialog').showModal(); };
+document.querySelector('#ai-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const file = document.querySelector('#ai-image').files[0];
+  const note = document.querySelector('#ai-note').value.trim();
+  const submit = document.querySelector('#ai-submit');
+  const output = document.querySelector('#ai-error');
+  output.textContent = '';
+  if (!note && !file) { output.textContent = 'Schreib ein paar Stichworte oder wähle ein Bild.'; return; }
+  submit.disabled = true;
+  submit.textContent = 'KI denkt nach …';
+  try {
+    const image = file ? await prepareImage(file) : '';
+    const proposal = await api('/api/suggest', { method:'POST', body:JSON.stringify({note,image}) });
+    document.querySelector('#ai-dialog').close();
+    openCardDialog();
+    document.querySelector('#card-title').value = proposal.title || '';
+    document.querySelector('#card-description').value = proposal.description || '';
+    document.querySelector('#importance').value = proposal.importance || 'medium';
+    document.querySelector('#urgency').value = proposal.urgency || 'medium';
+    document.querySelector('#due-date').value = proposal.dueDate || '';
+    document.querySelector('#checklist-inputs').innerHTML = '';
+    for (const item of proposal.checklist || []) addChecklistInput(typeof item === 'string' ? item : item.text);
+    imageData = image;
+    document.querySelector('#image-name').textContent = file?.name || '';
+    showToast('Prüfe den Vorschlag und tippe auf „Karte erstellen“.');
+  } catch (cause) { output.textContent = cause.message; }
+  finally { submit.disabled = false; submit.textContent = 'Vorschlag erstellen'; }
+});
 document.querySelector('#add-check').onclick = () => addChecklistInput();
 document.querySelector('#choose-image').onclick = () => document.querySelector('#card-image').click();
 document.querySelector('#card-image').onchange = async (event) => {
   const file = event.target.files[0]; if (!file) return;
-  if (!file.type.startsWith('image/')) { showToast('Bitte wähle eine Bilddatei.'); event.target.value = ''; return; }
-  if (file.size > 1_800_000) { showToast('Bitte wähle ein Bild unter 1,8 MB.'); event.target.value = ''; return; }
-  imageData = await new Promise((resolve) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.readAsDataURL(file); });
-  document.querySelector('#image-name').textContent = file.name;
+  try { imageData = await prepareImage(file); document.querySelector('#image-name').textContent = file.name; }
+  catch (cause) { showToast(cause.message); event.target.value = ''; }
 };
 const uploadArea = document.querySelector('#upload-area');
 uploadArea.ondragover = (event) => { event.preventDefault(); uploadArea.classList.add('dragging'); };
@@ -266,6 +316,6 @@ document.querySelectorAll('dialog').forEach((dialog) => dialog.addEventListener(
 setInterval(async () => {
   if (!currentUser || document.hidden) return;
   try { const fresh = await api('/api/cards'); if (JSON.stringify(fresh) !== JSON.stringify(cards)) { cards = fresh; render(); } }
-  catch { /* Temporary local server interruptions are shown on the next user action. */ }
-}, 3000);
+  catch { /* Temporary server interruptions are shown on the next user action. */ }
+}, 15000);
 checkSession();

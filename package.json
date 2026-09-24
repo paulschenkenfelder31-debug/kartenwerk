@@ -8,10 +8,15 @@
   },
   "scripts": {
     "start": "node server.mjs",
-    "mcp": "node mcp/server.mjs"
+    "mcp": "node mcp/server.mjs",
+    "deploy": "npm run db:migrations:apply && wrangler deploy",
+    "db:migrations:apply": "wrangler d1 migrations apply DB --remote"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.0",
     "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "wrangler": "^4.137.0"
   }
 }

@@ -1,0 +1,18 @@
+{
+  "name": "kartenwerk",
+  "main": "worker/index.mjs",
+  "compatibility_date": "2026-09-24",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kartenwerk-db",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "ai": { "binding": "AI" }
+}

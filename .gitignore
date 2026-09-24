@@ -5,6 +5,7 @@
 
 # Install dependencies from package-lock.json after cloning.
 /node_modules/
+/.wrangler/
 
 # Local configuration and runtime output
 .env
