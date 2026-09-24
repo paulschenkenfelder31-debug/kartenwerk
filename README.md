@@ -13,6 +13,12 @@ Voraussetzung: Node.js 20 oder neuer.
 
 Beim ersten Start erzeugt die App `data/local.json`. Sie enthält deine lokalen Konten, gehashte Passwörter, Sitzungen und Karten. Beende `npm start`, um den lokalen Server zu stoppen. Sichere oder kopiere `data/local.json`, wenn du deine Karten sichern möchtest.
 
+## Ohne Installation auf deinem Gerät: GitHub Codespaces
+
+Auf der Repository-Seite **Code → Codespaces → Create codespace** wählen. Beim ersten Start installiert Codespaces Node.js und die Projektabhängigkeiten und öffnet Kartenwerk als Vorschau. Auf einem Handy kannst du im Reiter **Ports** bei **4173 (Kartenwerk)** auf **Open in Browser** tippen, um die App in einem eigenen Browser-Tab zu verwenden.
+
+Die Konten und Karten liegen dann im Codespace unter `data/local.json`. Sie werden nicht ins öffentliche GitHub-Repository hochgeladen. Sichere diese Datei, bevor du den Codespace löschst. Codespaces hält die Daten beim Anhalten und Neustarten, beendet aber die laufende App nach Inaktivität. Ein Codespace ist deshalb kein dauerhafter Server. Falls du deinen Codespace bereits vor dieser Konfiguration erstellt hast, aktualisiere zunächst das Repository im Codespace und wähle danach **Codespaces: Rebuild Container**.
+
 ## Lokale Konten und E-Mail
 
 Die E-Mail-Adresse ist der lokale Benutzername. Eine Internetverbindung ist dafür nicht nötig; die App verschickt keine Bestätigungs- oder Passwort-E-Mails. Passwörter werden mit Node.js `scrypt` und individuellen Salts gehasht. Sitzungen werden in einem HttpOnly-Cookie gespeichert. Der Server bindet standardmäßig nur an `127.0.0.1` und ist damit nur von diesem Rechner erreichbar.
