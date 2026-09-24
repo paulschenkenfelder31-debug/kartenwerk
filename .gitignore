@@ -2,7 +2,6 @@
 # cards, and uploaded images. Keep it on this computer.
 /data/
 /upload/
-/github-release/
 
 # Install dependencies from package-lock.json after cloning.
 /node_modules/
