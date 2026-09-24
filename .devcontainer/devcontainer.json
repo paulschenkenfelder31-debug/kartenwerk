@@ -1,0 +1,15 @@
+{
+  "name": "Kartenwerk",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+  "postCreateCommand": "npm ci",
+  "postAttachCommand": {
+    "kartenwerk": "bash .devcontainer/start.sh"
+  },
+  "forwardPorts": [4173],
+  "portsAttributes": {
+    "4173": {
+      "label": "Kartenwerk",
+      "onAutoForward": "openPreview"
+    }
+  }
+}
