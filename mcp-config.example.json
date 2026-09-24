@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "kartenwerk": {
+      "command": "node",
+      "args": ["/ABSOLUTER/PFAD/ZU/kartenwerk/mcp/server.mjs"],
+      "env": {
+        "KARTENWERK_USER_EMAIL": "deine-e-mail@beispiel.de"
+      }
+    }
+  }
+}
